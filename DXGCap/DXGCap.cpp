@@ -25,6 +25,19 @@
 
 #include "DXGIManager.hpp"
 
+typedef struct {
+	void (*init)();
+	void(*uninit)();
+	void* (*create_dxgi_manager)();
+	void(*delete_dxgi_manager)(void* dxgi_manager);
+	void(*set_timeout)(void* dxgi_manager, unsigned int timeout);
+	void(*set_capture_source)(void* dxgi_manager, unsigned short cs);
+	unsigned short(*get_capture_source)(void* dxgi_manager);
+	bool(*refresh_output)(void* dxgi_manager);
+	void(*get_output_dimensions)(void* const dxgi_manager, unsigned int* width, unsigned int* height);
+	unsigned char(*get_frame_bytes)(void* dxgi_manager, size_t* o_size, unsigned char** o_bytes);
+} DXC_FUNCS;
+
 
 // C ABI
 extern "C" {
@@ -81,6 +94,22 @@ extern "C" {
 	__declspec(dllexport)
 	uint8_t get_frame_bytes(void* dxgi_manager, size_t* o_size, uint8_t** o_bytes) {
 		return ((DXGIManager*)dxgi_manager)->get_output_data(o_bytes, o_size);
+	}
+
+	__declspec(dllexport)
+		DXC_FUNCS dxc_funcs_get() {
+		DXC_FUNCS ret;
+		ret.init = init;
+		ret.uninit = uninit;
+		ret.create_dxgi_manager = create_dxgi_manager;
+		ret.delete_dxgi_manager = delete_dxgi_manager;
+		ret.set_timeout = set_timeout;
+		ret.set_capture_source = set_capture_source;
+		ret.get_capture_source = get_capture_source;
+		ret.refresh_output = refresh_output;
+		ret.get_output_dimensions = get_output_dimensions;
+		ret.get_frame_bytes = get_frame_bytes;
+		return ret;
 	}
 }
 
